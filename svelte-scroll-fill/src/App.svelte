@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import gsap from "gsap";
   import ScrollTrigger from "gsap/ScrollTrigger";
+  import CardStack from "./lib/CardStack.svelte";
 
   gsap.registerPlugin(ScrollTrigger);
 
@@ -100,3 +101,6 @@ Building systems that feel effortless and deliberate.
     </span>
   </h1>
 </section>
+<main>
+  <CardStack />
+</main>
