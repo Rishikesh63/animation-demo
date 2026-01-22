@@ -1,6 +1,8 @@
 <script lang="ts">
   import NavBar from "./lib/NavBar.svelte";
   import Hero from "./lib/Hero.svelte";
+  import Testimonial from "./lib/Testimonial.svelte";
+  import CardStack from "./lib/CardStack.svelte";
 </script>
 
 <style>
@@ -22,4 +24,7 @@
 <div class="app">
   <NavBar />
   <Hero />
+  <CardStack />
+
+  <!-- <Testimonial/> -->
 </div>

@@ -1,7 +1,7 @@
 <style>
 /* HERO — FIXED FULLSCREEN */
 .hero {
-  position: fixed;        /* locks screen */
+  position: fixed;
   inset: 0;
   width: 100vw;
   height: 100vh;
@@ -16,7 +16,7 @@
   inset: 0;
   width: 100vw;
   height: 100vh;
-  object-fit: cover;      /* no distortion */
+  object-fit: cover;
   z-index: 0;
 }
 
@@ -33,37 +33,43 @@
   );
 }
 
-/* CONTENT */
-.hero-content {
-  position: relative;
+/* CENTER CONTENT */
+.center-text {
+  position: absolute;
+  inset: 0;
   z-index: 2;
-  padding: 0 4vw;
-  padding-top: 55vh;
-  max-width: 1100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 6vw;
 }
 
-/* EYEBROW */
-.eyebrow {
-  font-size: 0.9rem;
-  letter-spacing: 0.08em;
-  opacity: 0.85;
-}
-
-/* TITLE */
-.hero-content h1 {
+.center-text h1 {
   font-size: clamp(2.5rem, 5vw, 4.5rem);
   font-weight: 600;
-  line-height: 1.05;
-  margin: 0.75rem 0 1.5rem;
+  line-height: 1.1;
+  margin: 0;
 }
 
-/* CTA — RIGHT ALIGNED */
-.cta {
+.center-text em {
+  display: block;
+  margin-top: 0.75rem;
+  font-size: clamp(1.4rem, 2.6vw, 2rem);
+  font-style: italic;
+  font-weight: 400;
+  opacity: 0.9;
+}
+
+/* CTA — RIGHT ALIGNED (OPTIONAL, KEPT) */
+/* .cta {
+  position: absolute;
+  right: 4vw;
+  bottom: 4vw;
   display: flex;
   gap: 0.75rem;
-  margin-left: auto;     /* push to right */
-  width: fit-content;
-}
+  z-index: 3;
+} */
 
 /* PRICE */
 .price {
@@ -112,14 +118,18 @@
   <!-- Fade -->
   <div class="fade-bottom"></div>
 
-  <!-- Content -->
-  <div class="hero-content">
-    <span class="eyebrow"> WATCH SERIES 11</span>
-    <h1>The ultimate way to watch your health.</h1>
-
-    <div class="cta">
-      <button class="price">From $549</button>
-      <button class="buy">Buy</button>
-    </div>
+  <!-- CENTER TEXT -->
+  <div class="center-text">
+    <h1>
+      The ultimate way<br />
+      to grow your plants
+      <em>at scale</em>
+    </h1>
   </div>
+
+  <!-- CTA (optional) -->
+  <!-- <div class="cta">
+    <button class="price">Start growing</button>
+    <button class="buy">Learn more</button>
+  </div> -->
 </section>

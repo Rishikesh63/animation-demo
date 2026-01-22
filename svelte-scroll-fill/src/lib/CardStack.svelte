@@ -11,18 +11,18 @@
     height: 7.2vw;
   }
   
-  .video-card-wrap {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
+.video-card-wrap {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
 
-    position: relative;
-    bottom: -0.5vw;
+  position: fixed;
+  left: 2vw;
+  bottom: 2vw;
 
-    width: 29vw;
-    margin-left: auto;
-    margin-right: auto;
-  }
+  width: 20vw;
+}
+
 
   /* STACK */
   .stack {
