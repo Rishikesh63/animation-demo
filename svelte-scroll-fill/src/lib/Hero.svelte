@@ -46,34 +46,40 @@
 }
 
 .center-text h1 {
-  font-size: clamp(2.5rem, 5vw, 4.5rem);
-  font-weight: 600;
-  line-height: 1.1;
+  font-family: "Instrument Sans", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: clamp(3rem, 5vw, 4rem); /* ~64px desktop */
+  font-weight: 600;                 /* SemiBold */
+  line-height: 1.1;                 /* 110% */
+  letter-spacing: -0.03em;          /* -3% */
   margin: 0;
+  color: #E8F7F3;
 }
 
+/* "at scale" */
 .center-text em {
   display: block;
   margin-top: 0.75rem;
-  font-size: clamp(1.4rem, 2.6vw, 2rem);
+  font-size: clamp(1.6rem, 2.6vw, 2.1rem);
   font-style: italic;
   font-weight: 400;
-  opacity: 0.9;
+  letter-spacing: -0.01em;
+  opacity: 0.95;
 }
 
+
 /* CTA — RIGHT ALIGNED (OPTIONAL, KEPT) */
-/* .cta {
+.cta {
   position: absolute;
   right: 4vw;
   bottom: 4vw;
   display: flex;
   gap: 0.75rem;
   z-index: 3;
-} */
+}
 
 /* PRICE */
-.price {
-  background: rgba(255,255,255,0.15);
+.start-growing {
+  background: rgba(69, 246, 4, 0.742);
   backdrop-filter: blur(10px);
   border-radius: 999px;
   padding: 0.5rem 1.1rem;
@@ -83,8 +89,8 @@
 }
 
 /* BUY */
-.buy {
-  background: #0071e3;
+.learn-more {
+  background: rgba(255, 255, 255, 0.15);
   border-radius: 999px;
   padding: 0.5rem 1.2rem;
   border: none;
@@ -93,7 +99,7 @@
   cursor: pointer;
 }
 
-.buy:hover {
+.learn-more:hover {
   background: #0a84ff;
 }
 </style>
@@ -128,8 +134,8 @@
   </div>
 
   <!-- CTA (optional) -->
-  <!-- <div class="cta">
-    <button class="price">Start growing</button>
-    <button class="buy">Learn more</button>
-  </div> -->
+  <div class="cta">
+    <button class="start-growing">Start growing</button>
+    <button class="learn-more">Learn more</button>
+  </div>
 </section>
