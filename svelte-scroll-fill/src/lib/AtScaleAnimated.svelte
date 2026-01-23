@@ -1,41 +1,71 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { useAnimatedText } from '../hooks/useAnimatedText';
+	import { onMount, onDestroy } from 'svelte';
 
 	const phrases = ['at scale', 'with precision'];
-	let index = 0;
-	let cursor = 0;
 
-	const anim = useAnimatedText(phrases[index], 2, 0);
+	let phraseIndex = 0;
+	let text = '';
+	let charIndex = 0;
 
-	const next = () => {
-		setTimeout(() => {
-			index = (index + 1) % phrases.length;
-			anim.reset(phrases[index]);
-			cursor = 0;
-			anim.start((c) => (cursor = c), next);
-		}, 1200);
-	};
+	let mode: 'typing' | 'erasing' = 'typing';
+
+	const TYPE_DURATION = 500; 
+	const ERASE_DURATION = 300; 
+	const PAUSE_AFTER_TYPE = 1200;
+
+	let timer: number;
+
+	function startTyping() {
+		clearInterval(timer);
+		const phrase = phrases[phraseIndex];
+		const step = TYPE_DURATION / phrase.length;
+
+		timer = window.setInterval(() => {
+			charIndex++;
+			text = phrase.slice(0, charIndex);
+
+			if (charIndex === phrase.length) {
+				clearInterval(timer);
+				setTimeout(startErasing, PAUSE_AFTER_TYPE);
+			}
+		}, step);
+	}
+
+	function startErasing() {
+		clearInterval(timer);
+		const phrase = phrases[phraseIndex];
+		const step = ERASE_DURATION / phrase.length;
+
+		timer = window.setInterval(() => {
+			charIndex--;
+			text = phrase.slice(0, charIndex);
+
+			if (charIndex === 0) {
+				clearInterval(timer);
+				phraseIndex = (phraseIndex + 1) % phrases.length;
+				startTyping();
+			}
+		}, step);
+	}
 
 	onMount(() => {
-		anim.start((c) => (cursor = c), next);
-		return () => anim.stop();
+		startTyping();
+	});
+
+	onDestroy(() => {
+		clearInterval(timer);
 	});
 </script>
 
 <span class="at-scale">
-	{#each anim.words.slice(0, cursor) as word, i}
-		<span class="word" style={`animation-delay:${i * 0.08}s`}>
-			{word}
-		</span>
-	{/each}
+	{text}
 </span>
 
 <style>
 	.at-scale {
-		display: flex;
-		justify-content: center;
-		gap: 0.45ch;
+		display: inline-block;
+		white-space: nowrap;
+
 		font-family: "Instrument Serif", serif;
 		font-style: italic;
 		font-size: 64px;
@@ -43,19 +73,5 @@
 		line-height: 110%;
 		letter-spacing: -0.03em;
 		color: #E8F7F3;
-	}
-
-	.word {
-		opacity: 0;
-		filter: blur(1.5px);
-		animation: word-in 0.45s ease-out forwards;
-	}
-
-	@keyframes word-in {
-		to {
-			opacity: 1;
-			filter: blur(0);
-			transform: translateY(0);
-		}
 	}
 </style>
