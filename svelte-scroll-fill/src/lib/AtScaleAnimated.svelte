@@ -6,7 +6,7 @@
     let index = 0;
     let cursor = 0;
 
-    const anim = useAnimatedText(phrases[index], .9);
+    const anim = useAnimatedText(phrases[index], .5);
 
     const runSequence = () => {
         // 1. Type out
