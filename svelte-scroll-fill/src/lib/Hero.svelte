@@ -73,7 +73,9 @@
 
 .at-scale-wrap {
 	display: block;
+	height: 1.2em;
 	margin-top: 0.4rem;
+	overflow: hidden;
 }
 
 /* CTA */

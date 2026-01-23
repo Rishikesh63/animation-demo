@@ -36,8 +36,6 @@
 		display: flex;
 		justify-content: center;
 		gap: 0.45ch;
-		margin-top: 0.5rem;
-
 		font-family: "Instrument Serif", serif;
 		font-style: italic;
 		font-size: 64px;
