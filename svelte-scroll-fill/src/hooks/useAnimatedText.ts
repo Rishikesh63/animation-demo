@@ -1,42 +1,40 @@
-export function useAnimatedText(text: string, duration: number) {
-    let characters = text.split(''); 
-    let cursor = 0;
-    let timer: number | null = null;
+// src/lib/hooks/useAnimatedText.ts
+export function useAnimatedText(text: string, duration: number, delay = 0) {
+	const words = text.split(' ');
 
-    const start = (onCursorChange: (c: number) => void, onComplete?: () => void) => {
-        const step = (duration / characters.length) * 1000;
-        timer = window.setInterval(() => {
-            cursor++;
-            onCursorChange(cursor);
-            if (cursor >= characters.length) {
-                stop();
-                onComplete?.();
-            }
-        }, step);
-    };
+	let cursor = 0;
+	let completed = false;
+	let timer: number | null = null;
 
-    const reverse = (onCursorChange: (c: number) => void, onComplete?: () => void) => {
-        const step = ((duration * 0.5) / characters.length) * 1000; // Erase faster
-        timer = window.setInterval(() => {
-            cursor--;
-            onCursorChange(cursor);
-            if (cursor <= 0) {
-                stop();
-                onComplete?.();
-            }
-        }, step);
-    };
+	const start = (onCursorChange: (c: number) => void, onComplete?: () => void) => {
+		const total = words.length;
+		const step = duration / total;
 
-    const stop = () => { if (timer) { clearInterval(timer); timer = null; } };
+		timer = window.setInterval(
+			() => {
+				cursor++;
+				onCursorChange(cursor);
 
-    const reset = (newText: string) => {
-        stop();
-        characters = newText.split('');
-        cursor = 0;
-    };
+				if (cursor >= total) {
+					completed = true;
+					onComplete?.();
+					stop();
+				}
+			},
+			step * 1000 + delay
+		);
+	};
 
-    return {
-        get characters() { return characters; },
-        start, reverse, stop, reset
-    };
+	const stop = () => {
+		if (timer) clearInterval(timer);
+	};
+
+	return {
+		words,
+		start,
+		stop,
+		get completed() {
+			return completed;
+		}
+	};
 }

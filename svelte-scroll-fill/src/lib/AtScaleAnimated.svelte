@@ -1,98 +1,112 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 
-	const phrases = ['at scale', 'with precision'];
+	// Using the same structure as the placeholder logic
+	const placeholderLines: string[] = ['at scale', 'with precision']; // Your phrases as placeholderLines
+	const placeholderTypingSpeed = 25; // Your typingSpeed
+	const placeholderDeleteSpeed = 15; // Your deleteSpeed
+	const placeholderLineDelay = 800; // Your lineDelay
 
-	let phraseIndex = 0;
-	let displayText: string[] = [];
-	let charIndex = 0;
-	let isDeleting = false;
-	let timer: ReturnType<typeof setTimeout> | null = null;
+	let placeholderIndex = 0;
+	let placeholderText: string[] = [];
+	let placeholderCharIndex = 0;
+	let placeholderDeleting = false;
+	let placeholderTimer: ReturnType<typeof setTimeout> | null = null;
 
-	const typingSpeed = 60;   // ms per char (smooth)
-	const deleteSpeed = 40;   // erase speed
-	const lineDelay = 1200;   // pause after full phrase
+	const stepPlaceholder = () => {
+		const full = placeholderLines[placeholderIndex];
 
-	function step() {
-		const full = phrases[phraseIndex];
-
-		if (!isDeleting) {
-			// Typing
-			if (charIndex < full.length) {
-				displayText = [...displayText, full[charIndex]];
-				charIndex++;
-				timer = setTimeout(step, typingSpeed);
+		if (!placeholderDeleting) {
+			if (placeholderCharIndex < full.length) {
+				placeholderText = [...placeholderText, full[placeholderCharIndex]];
+				placeholderCharIndex += 1;
+				placeholderTimer = setTimeout(stepPlaceholder, placeholderTypingSpeed);
 			} else {
-				timer = setTimeout(() => {
-					isDeleting = true;
-					step();
-				}, lineDelay);
+				placeholderTimer = setTimeout(() => {
+					placeholderDeleting = true;
+					stepPlaceholder();
+				}, placeholderLineDelay);
 			}
+		} else if (placeholderCharIndex > 0) {
+			placeholderCharIndex -= 1;
+			placeholderText = placeholderText.slice(0, -1);
+			placeholderTimer = setTimeout(stepPlaceholder, placeholderDeleteSpeed);
 		} else {
-			// Deleting
-			if (charIndex > 0) {
-				charIndex--;
-				displayText = displayText.slice(0, -1);
-				timer = setTimeout(step, deleteSpeed);
-			} else {
-				isDeleting = false;
-				phraseIndex = (phraseIndex + 1) % phrases.length;
-				timer = setTimeout(step, typingSpeed);
-			}
+			placeholderDeleting = false;
+			placeholderIndex = (placeholderIndex + 1) % placeholderLines.length;
+			placeholderTimer = setTimeout(stepPlaceholder, placeholderTypingSpeed);
 		}
-	}
+	};
 
-	onMount(() => {
-		step();
-	});
+	onMount(stepPlaceholder);
 
 	onDestroy(() => {
-		if (timer) clearTimeout(timer);
+		if (placeholderTimer !== null) {
+			clearTimeout(placeholderTimer);
+		}
 	});
 
-	/* IN transition */
-	function flyBlurIn(
+	// Exact same transitions as placeholder
+	const flyBlurIn = (
 		node: Element,
-		{ duration = 200, y = 8, blur = 6 } = {}
-	) {
+		{
+			delay = 0,
+			duration = 200,
+			y = 10,
+			blur = 6
+		}: { delay?: number; duration?: number; y?: number; blur?: number } = {}
+	) => {
 		return {
+			delay,
 			duration,
 			css: (t: number) => {
 				const u = 1 - t;
-				return `
-					opacity: ${t};
-					transform: translateY(${u * y}px);
-					filter: blur(${u * blur}px);
-				`;
-			}
-		};
-	}
+				const opacity = t;
+				const translateY = u * y;
+				const blurAmount = u * blur;
 
-	/* OUT transition */
-	function blurOut(
+				return `
+                    opacity: ${opacity};
+                    transform: translateY(${translateY}px);
+                    filter: blur(${blurAmount}px);
+                `;
+			}
+		};
+	};
+
+	const blurOut = (
 		node: Element,
-		{ duration = 120, blur = 6 } = {}
-	) {
+		{
+			delay = 0,
+			duration = 140,
+			blur = 6
+		}: { delay?: number; duration?: number; blur?: number } = {}
+	) => {
 		return {
+			delay,
 			duration,
 			css: (t: number) => {
 				const u = 1 - t;
+				const opacity = t;
+				const blurAmount = u * blur;
+
 				return `
-					opacity: ${t};
-					filter: blur(${u * blur}px);
-				`;
+                    opacity: ${opacity};
+                    transform: translateY(0px);
+                    filter: blur(${blurAmount}px);
+                `;
 			}
 		};
-	}
+	};
 </script>
 
 <div class="wrapper">
 	<span class="animated-text">
-		{#each displayText as ch, i (i)}
+		{#each placeholderText as ch, i (i)}
 			<span
 				class="char"
-				in:flyBlurIn
-				out:blurOut
+				in:flyBlurIn={{ duration: 200, y: 8, blur: 6 }}
+				out:blurOut={{ duration: 120, blur: 6 }}
 			>
 				{ch === ' ' ? '\u00A0' : ch}
 			</span>
@@ -108,7 +122,7 @@
 	}
 
 	.animated-text {
-		display: flex;
+		display: inline-flex;
 		white-space: nowrap;
 
 		font-family: "Instrument Serif", serif;
