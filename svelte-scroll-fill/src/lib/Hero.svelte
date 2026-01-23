@@ -1,3 +1,11 @@
+<!-- GOOGLE FONT -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+<link
+  href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap"
+  rel="stylesheet"
+/>
+
 <style>
 /* HERO — FIXED FULLSCREEN */
 .hero {
@@ -45,12 +53,13 @@
   padding: 0 6vw;
 }
 
+/* MAIN HEADLINE */
 .center-text h1 {
-  font-family: "Instrument Sans", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: clamp(3rem, 5vw, 4rem); /* ~64px desktop */
-  font-weight: 600;                 /* SemiBold */
-  line-height: 1.1;                 /* 110% */
-  letter-spacing: -0.03em;          /* -3% */
+  font-family: "Instrument Sans";
+  font-size:64px;
+  font-weight: 600;
+  line-height: 110%;
+  letter-spacing: -0.03em;
   margin: 0;
   color: #E8F7F3;
 }
@@ -66,8 +75,7 @@
   opacity: 0.95;
 }
 
-
-/* CTA — RIGHT ALIGNED (OPTIONAL, KEPT) */
+/* CTA */
 .cta {
   position: absolute;
   right: 4vw;
@@ -77,18 +85,17 @@
   z-index: 3;
 }
 
-/* PRICE */
 .start-growing {
-  background: rgba(69, 246, 4, 0.742);
+  background: rgba(69, 246, 4, 0.74);
   backdrop-filter: blur(10px);
   border-radius: 999px;
   padding: 0.5rem 1.1rem;
   border: none;
   color: white;
   font-size: 0.95rem;
+  cursor: pointer;
 }
 
-/* BUY */
 .learn-more {
   background: rgba(255, 255, 255, 0.15);
   border-radius: 999px;
@@ -133,7 +140,7 @@
     </h1>
   </div>
 
-  <!-- CTA (optional) -->
+  <!-- CTA -->
   <div class="cta">
     <button class="start-growing">Start growing</button>
     <button class="learn-more">Learn more</button>
