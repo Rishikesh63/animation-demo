@@ -1,85 +1,127 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
-    import { useAnimatedText } from '../hooks/useAnimatedText';
+	import { onMount, onDestroy } from 'svelte';
 
-    const phrases = ['at scale', 'with precision'];
-    let index = 0;
-    let cursor = 0;
+	const phrases = ['at scale', 'with precision'];
 
-    const anim = useAnimatedText(phrases[index], .5);
+	let phraseIndex = 0;
+	let displayText: string[] = [];
+	let charIndex = 0;
+	let isDeleting = false;
+	let timer: ReturnType<typeof setTimeout> | null = null;
 
-    const runSequence = () => {
-        // 1. Type out
-        anim.start((c) => (cursor = c), () => {
-            // 2. Wait at full text
-            setTimeout(() => {
-                // 3. Erase (Go left effect)
-                anim.reverse((c) => (cursor = c), () => {
-                    // 4. Switch word and repeat
-                    index = (index + 1) % phrases.length;
-                    anim.reset(phrases[index]);
-                    runSequence();
-                });
-            }, 2000);
-        });
-    };
+	const typingSpeed = 60;   // ms per char (smooth)
+	const deleteSpeed = 40;   // erase speed
+	const lineDelay = 1200;   // pause after full phrase
 
-    onMount(() => {
-        runSequence();
-        return () => anim.stop();
-    });
+	function step() {
+		const full = phrases[phraseIndex];
+
+		if (!isDeleting) {
+			// Typing
+			if (charIndex < full.length) {
+				displayText = [...displayText, full[charIndex]];
+				charIndex++;
+				timer = setTimeout(step, typingSpeed);
+			} else {
+				timer = setTimeout(() => {
+					isDeleting = true;
+					step();
+				}, lineDelay);
+			}
+		} else {
+			// Deleting
+			if (charIndex > 0) {
+				charIndex--;
+				displayText = displayText.slice(0, -1);
+				timer = setTimeout(step, deleteSpeed);
+			} else {
+				isDeleting = false;
+				phraseIndex = (phraseIndex + 1) % phrases.length;
+				timer = setTimeout(step, typingSpeed);
+			}
+		}
+	}
+
+	onMount(() => {
+		step();
+	});
+
+	onDestroy(() => {
+		if (timer) clearTimeout(timer);
+	});
+
+	/* IN transition */
+	function flyBlurIn(
+		node: Element,
+		{ duration = 200, y = 8, blur = 6 } = {}
+	) {
+		return {
+			duration,
+			css: (t: number) => {
+				const u = 1 - t;
+				return `
+					opacity: ${t};
+					transform: translateY(${u * y}px);
+					filter: blur(${u * blur}px);
+				`;
+			}
+		};
+	}
+
+	/* OUT transition */
+	function blurOut(
+		node: Element,
+		{ duration = 120, blur = 6 } = {}
+	) {
+		return {
+			duration,
+			css: (t: number) => {
+				const u = 1 - t;
+				return `
+					opacity: ${t};
+					filter: blur(${u * blur}px);
+				`;
+			}
+		};
+	}
 </script>
 
 <div class="wrapper">
-    <div class="content-box">
-        <span class="animated-text">
-            {#each anim.characters.slice(0, cursor) as char, i (i)}
-                <span class="char">
-                    {char === ' ' ? '\u00A0' : char}
-                </span>
-            {/each}
-        </span>
-    </div>
+	<span class="animated-text">
+		{#each displayText as ch, i (i)}
+			<span
+				class="char"
+				in:flyBlurIn
+				out:blurOut
+			>
+				{ch === ' ' ? '\u00A0' : ch}
+			</span>
+		{/each}
+	</span>
 </div>
 
 <style>
-    .wrapper {
-        display: flex;
-        justify-content: center;
-        width: 100%;
-    }
+	.wrapper {
+		display: flex;
+		justify-content: center;
+		width: 100%;
+	}
 
-    .content-box {
-        display: flex;
-        justify-content: center;
-        min-height: 80px;
-        /* This ensures the container shrinks/grows from center */
-        transition: width 0.2s ease; 
-    }
+	.animated-text {
+		display: flex;
+		white-space: nowrap;
 
-    .animated-text {
-        display: flex;
-        font-family: "Instrument Serif", serif;
-        font-style: italic;
-        font-size: 64px;
-        font-weight: 400;
-        color: #E8F7F3;
-        white-space: nowrap;
-    }
+		font-family: "Instrument Serif", serif;
+		font-style: italic;
+		font-size: 64px;
+		font-weight: 400;
+		line-height: 110%;
+		letter-spacing: -0.03em;
+		color: #E8F7F3;
+	}
 
-    .char {
-        display: inline-block;
-        opacity: 0;
-        filter: blur(5px);
-        transform: translateX(-5px); /* Slide in from left while typing */
-        animation: char-in 0.3s ease-out forwards;
-    }
-
-    @keyframes char-in {
-        to {
-            opacity: 1;
-            filter: blur(0);
-            transform: translateX(0);
-        }
-    }
+	.char {
+		display: inline-block;
+		will-change: transform, filter, opacity;
+	}
 </style>
