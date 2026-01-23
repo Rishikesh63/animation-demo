@@ -9,7 +9,9 @@
   href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap"
   rel="stylesheet"
 />
-
+<script>
+	import AtScaleAnimated from './AtScaleAnimated.svelte';
+</script>
 
 <style>
 /* HERO — FIXED FULLSCREEN */
@@ -69,20 +71,10 @@
   color: #E8F7F3;
 }
 
-/* "at scale" */
-.center-text em {
-  display: block;
-  font-family: "Instrument Serif", serif;
-  font-style: italic;
-  font-size: 64px;
-  font-weight: 400;
-  line-height: 110%;
-  letter-spacing: -0.03em;
-  color: #E8F7F3;
-  opacity: 1;
-  margin-top: 0.5rem;
+.at-scale-wrap {
+	display: block;
+	margin-top: 0.4rem;
 }
-
 
 /* CTA */
 .cta {
@@ -145,7 +137,10 @@
     <h1>
       The ultimate way<br />
       to grow your plants
-      <em>at scale</em>
+      <span class="at-scale-wrap">
+		<AtScaleAnimated />
+	</span>
+
     </h1>
   </div>
 
