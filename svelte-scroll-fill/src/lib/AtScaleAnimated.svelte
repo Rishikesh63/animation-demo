@@ -1,11 +1,10 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-
-	// Using the same structure as the placeholder logic
-	const placeholderLines: string[] = ['at scale', 'with precision']; // Your phrases as placeholderLines
-	const placeholderTypingSpeed = 25; // Your typingSpeed
-	const placeholderDeleteSpeed = 15; // Your deleteSpeed
-	const placeholderLineDelay = 800; // Your lineDelay
+	
+	const placeholderLines: string[] = ['at scale', 'with precision']; 
+	const placeholderTypingSpeed = 60; 
+	const placeholderDeleteSpeed = 40; 
+	const placeholderLineDelay = 1200; 
 
 	let placeholderIndex = 0;
 	let placeholderText: string[] = [];
@@ -45,8 +44,7 @@
 			clearTimeout(placeholderTimer);
 		}
 	});
-
-	// Exact same transitions as placeholder
+	
 	const flyBlurIn = (
 		node: Element,
 		{
