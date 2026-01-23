@@ -5,6 +5,11 @@
   href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap"
   rel="stylesheet"
 />
+<link
+  href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap"
+  rel="stylesheet"
+/>
+
 
 <style>
 /* HERO — FIXED FULLSCREEN */
@@ -67,13 +72,17 @@
 /* "at scale" */
 .center-text em {
   display: block;
-  margin-top: 0.75rem;
-  font-size: clamp(1.6rem, 2.6vw, 2.1rem);
+  font-family: "Instrument Serif", serif;
   font-style: italic;
+  font-size: 64px;
   font-weight: 400;
-  letter-spacing: -0.01em;
-  opacity: 0.95;
+  line-height: 110%;
+  letter-spacing: -0.03em;
+  color: #E8F7F3;
+  opacity: 1;
+  margin-top: 0.5rem;
 }
+
 
 /* CTA */
 .cta {
