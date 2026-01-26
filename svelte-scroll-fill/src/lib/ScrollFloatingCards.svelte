@@ -1,5 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import type { CardConfig } from './scrollEngine';
+	import {
+		lerp,
+		rangeProgress,
+		computeScrollProgress
+	} from './scrollEngine';
 
 	let section: HTMLElement;
 	let nextSection: HTMLElement;
@@ -7,168 +13,175 @@
 	let progress = 0;
 	let nextProgress = 0;
 
-	function lerp(a: number, b: number, t: number) {
-		return a + (b - a) * t;
-	}
-
-	function clamp(v: number, min = 0, max = 1) {
-		return Math.min(max, Math.max(min, v));
-	}
-
-	function cardProgress(global: number, start: number, end: number) {
-		return clamp((global - start) / (end - start));
-	}
+	/* ===============================
+	   CARD CONFIG
+	================================ */
+	const cards: CardConfig[] = [
+		{
+			id: 1,
+			from: { x: 50, y: -100 },
+			to: { x: -300, y: -140 },
+			startAt: 0.0,
+			endAt: 0.35,
+			blurFrom: 12,
+			blurTo: 0
+		},
+		{
+			id: 2,
+			from: { x: 140, y: -120 },
+			to: { x: 500, y: -400 },
+			startAt: 0.15,
+			endAt: 0.55,
+			blurFrom: 12,
+			blurTo: 0
+		},
+		{
+			id: 3,
+			from: { x: -140, y: 120 },
+			to: { x: -600, y: 400 },
+			startAt: 0.35,
+			endAt: 0.8,
+			blurFrom: 12,
+			blurTo: 0
+		},
+		{
+			id: 4,
+			from: { x: 140, y: 120 },
+			to: { x: 600, y: 500 },
+			startAt: 0.55,
+			endAt: 1,
+			blurFrom: 12,
+			blurTo: 0
+		}
+	];
 
 	function onScroll() {
-	const viewport = window.innerHeight;
-
-	/* main scene */
-	const rect = section.getBoundingClientRect();
-	const raw = 1 - (rect.bottom - viewport) / rect.height;
-	progress = clamp(raw);
-
-	/* next section (FIXED) */
-	const nextRect = nextSection.getBoundingClientRect();
-	const rawNext =
-		(viewport - nextRect.top) / (viewport + nextRect.height);
-	nextProgress = clamp(rawNext);
-}
-
+		progress = computeScrollProgress(section);
+		nextProgress = computeScrollProgress(nextSection, 100);
+	}
 
 	onMount(() => {
-		window.addEventListener('scroll', onScroll);
+		window.addEventListener('scroll', onScroll, { passive: true });
 		onScroll();
 		return () => window.removeEventListener('scroll', onScroll);
 	});
 </script>
 
-<!-- ================= SCROLL SCENE ================= -->
-<section bind:this={section} class="wrapper">
-	<div class="scene">
-		<div class="cards" style="opacity:{1 - progress}">
-			
-			<!-- CARD 1 -->
-			<div
-				class="card"
-				style="
-					transform: translate(
-						{lerp(-140, -700, progress)}px,
-						{lerp(-120, -500, progress)}px
-					);
-					filter: blur({lerp(10, 0, cardProgress(progress, 0.0, 0.35))}px);
-				"
-			/>
+<!-- ===============================
+	PAGE WRAPPER (OWNS BACKGROUND)
+================================ -->
+<div class="scroll-page">
 
-			<!-- CARD 2 -->
-			<div
-				class="card"
-				style="
-					transform: translate(
-						{lerp(140, 500, progress)}px,
-						{lerp(-120, -400, progress)}px
-					);
-					filter: blur({lerp(10, 0, cardProgress(progress, 0.15, 0.55))}px);
-				"
-			/>
+	<!-- ===============================
+		FLOATING CARDS SCENE
+	================================ -->
+	<section bind:this={section} class="wrapper">
+		<div class="scene">
+			{#each cards as card}
+				{@const t = rangeProgress(progress, card.startAt, card.endAt)}
 
-			<!-- CARD 3 -->
-			<div
-				class="card"
-				style="
-					transform: translate(
-						{lerp(-140, -600, progress)}px,
-						{lerp(120, 400, progress)}px
-					);
-					filter: blur({lerp(10, 0, cardProgress(progress, 0.35, 0.8))}px);
-				"
-			/>
+				<div
+					class="card"
+					style="
+						transform: translate3d(
+							calc(-50% + {lerp(card.from.x, card.to.x, t)}px),
+							{lerp(card.from.y, card.to.y, t)}px,
+							0
+						);
+						filter: blur({lerp(card.blurFrom, card.blurTo, t)}px);
+					"
+				/>
+			{/each}
 
-			<!-- CARD 4 -->
-			<div
-				class="card"
+			<h2
+				class="title"
 				style="
-					transform: translate(
-						{lerp(140, 600, progress)}px,
-						{lerp(120, 500, progress)}px
-					);
-					filter: blur({lerp(10, 0, cardProgress(progress, 0.55, 1))}px);
+					opacity: {1 - progress};
+					filter: blur({lerp(4, 0, progress)}px);
 				"
-			/>
+			>
+				Scroll to Explore
+			</h2>
 		</div>
+	</section>
 
-		<!-- TITLE -->
-		<h2
-			class="title"
+	<!-- ===============================
+		NEXT SECTION
+	================================ -->
+	<section bind:this={nextSection} class="next-section">
+		<div
+			class="next-card"
 			style="
-				opacity: {1 - progress};
-				filter: blur({lerp(1, 0, progress)}px);
+				opacity: {lerp(0.4, 1, nextProgress)};
+				filter: blur({lerp(1, 0, nextProgress)}px);
+				transform: translateY({lerp(30, 0, nextProgress)}px);
 			"
 		>
-			Scroll to Explore
-		</h2>
-	</div>
-</section>
+			<p>
+				In mobile layouts, components such as lists or cards are stretched
+				to fit the full width of the screen without compromising visual or UX
+				qualities. When designing for large screens, use multiple columns to
+				display content.
+			</p>
+		</div>
+	</section>
 
-<!-- ================= NEXT SECTION ================= -->
-<section bind:this={nextSection} class="next-section">
-	<div
-		class="next-card"
-		style="
-			filter: blur({lerp(1, 0, nextProgress)}px);
-			opacity: {lerp(0.6, 1, nextProgress)};
-			transform: translateY({lerp(20, 0, nextProgress)}px);
-		"
-	>
-		<p>
-			In mobile layouts, components such as lists or cards are stretched to fit the full width of the screen without compromising visual or ux qualities. When designing for large screens, use multiple columns to display content
-		</p>
-	</div>
-</section>
+</div>
 
 <style>
-/* ================= SCROLL AREA ================= */
+
+
+/* ===============================
+	SCROLL AREA
+================================ */
+
+
 .wrapper {
-	min-height: 160vh;
-	/* padding-top: 100vh; */
+	min-height: 180vh;
 	position: relative;
-    z-index: 1;
+	z-index: 1;
 }
 
-/* ================= STICKY SCENE ================= */
+/* ===============================
+	STICKY SCENE
+================================ */
 .scene {
 	position: sticky;
-	top: calc(100vh + 60vh);
+	top: 25vh;
 	height: 50vh;
 	display: grid;
 	place-items: center;
 }
 
-/* ================= CARDS ================= */
-.cards {
-	position: absolute;
-	inset: 0;
-}
-
+/* ===============================
+	CARDS
+================================ */
 .card {
 	position: absolute;
+    top: 30px;
 	left: 50%;
 	width: 200px;
 	height: 260px;
-	background: rgba(6, 233, 29, 0.15);
 	border-radius: 20px;
+	background: #07e307f1;
 	backdrop-filter: blur(10px);
 	will-change: transform, filter;
 }
 
-/* ================= TEXT ================= */
+/* ===============================
+	TITLE
+================================ */
 .title {
 	position: absolute;
-	text-align: center;
 	font-size: 2rem;
+	text-align: center;
 	will-change: opacity, filter;
+    color:black;
 }
 
-/* ================= NEXT SECTION ================= */
+/* ===============================
+	NEXT SECTION
+================================ */
 .next-section {
 	min-height: 100vh;
 	display: grid;
@@ -177,10 +190,11 @@
 
 .next-card {
 	width: 420px;
-	padding: 0px;
+	padding: 0;
 	border-radius: 20px;
-	background: rgba(255, 255, 255, 0.22);
+	background: rgba(244, 9, 9, 0.22);
 	text-align: center;
 	will-change: transform, filter, opacity;
+    color: black;
 }
 </style>
