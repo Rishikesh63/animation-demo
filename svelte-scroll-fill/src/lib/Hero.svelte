@@ -16,13 +16,14 @@
 <style>
 /* HERO — FIXED FULLSCREEN */
 .hero {
-  position: fixed;
+  position: relative;
   inset: 0;
   width: 100vw;
   height: 100vh;
   overflow: hidden;
   background: #000;
   color: white;
+  z-index: 0;
 }
 
 /* VIDEO — FULL SCREEN COVER */
@@ -75,7 +76,7 @@
 	display: block;
 	height: 1.2em;
 	margin-top: 0.4rem;
-	overflow: hidden;
+	overflow-y: auto;
 }
 
 /* CTA */
