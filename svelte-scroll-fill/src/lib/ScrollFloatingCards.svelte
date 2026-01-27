@@ -131,7 +131,7 @@
     }
 
     .hatch-title {
-        font-size: clamp(32px, 7vw, 60px);
+        font-size:  clamp(1.1rem, 2.5vw, 1.6rem);
         color: #1a1a1a;
         display: flex;
         white-space: nowrap;
