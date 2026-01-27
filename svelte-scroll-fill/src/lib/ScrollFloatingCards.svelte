@@ -9,15 +9,12 @@
         return Math.max(0, Math.min(1, t));
     };
 
-    // --- State ---
     let section: HTMLElement;
     let nextSection: HTMLElement;
     
-    // Target scroll values
     let rawProgress = 0;
     let rawNextProgress = 0;
     
-    // Smoothed values for the "momentum" effect
     let smoothProgress = 0;
     let smoothNextProgress = 0;
 
@@ -30,47 +27,44 @@
 
     // --- SMOOTHING ENGINE ---
     function tick() {
-        // Lowering to 0.08 makes the "momentum" even smoother and more premium
-        smoothProgress = lerp(smoothProgress, rawProgress, 0.01);
-        smoothNextProgress = lerp(smoothNextProgress, rawNextProgress, 0.01);
+        // Changed from 0.009 (too slow/stuck) to 0.07 (smooth but responsive)
+        const friction = 0.07;
+        smoothProgress = lerp(smoothProgress, rawProgress, friction);
+        smoothNextProgress = lerp(smoothNextProgress, rawNextProgress, friction);
         
         requestAnimationFrame(tick);
     }
 
     // --- REACTIVE STYLES ---
-    // Title Falling
-    $: titleMoveDown = lerp(0, 500, smoothProgress); 
-    $: phraseBlurExit = rangeProgress(smoothProgress, 0.45, 0.85);
-    $: restWordBlurExit = rangeProgress(smoothProgress, 0.70, 0.95);
+    $: titleMoveDown = lerp(0, 450, smoothProgress); 
+    $: phraseBlurExit = rangeProgress(smoothProgress, 0.45, 0.80);
+    $: restWordBlurExit = rangeProgress(smoothProgress, 0.65, 0.90);
 
     $: phraseStyle = `
         opacity: ${1 - phraseBlurExit}; 
-        filter: blur(${phraseBlurExit * 20}px);
+        filter: blur(${phraseBlurExit * 15}px);
         transform: translate3d(0, ${titleMoveDown}px, 0);
     `;
     $: restStyle = `
-        opacity: ${1 - restWordBlurExit}; 
-        filter: blur(${restWordBlurExit * 20}px);
+        opacity: ${restWordBlurExit > 0.9 ? 0 : 1 - restWordBlurExit}; 
+        filter: blur(${restWordBlurExit * 15}px);
         transform: translate3d(0, ${titleMoveDown}px, 0);
     `;
 
-    // Next Section Rising (The "Smoothness" fix is here)
-    // We increase the range (0.1 to 0.6) so the movement is more gradual
-    $: nextEnter = rangeProgress(smoothNextProgress, 0.1, 0.6); 
-    $: nextMoveUp = lerp(250, 0, nextEnter); // Now moves relative to the entering progress
+    // Increased entrance window so it starts rising sooner (0.05 vs 0.1)
+    $: nextEnter = rangeProgress(smoothNextProgress, 0.05, 0.5); 
+    $: nextMoveUp = lerp(200, 0, nextEnter);
 
     $: nextStyle = `
         opacity: ${nextEnter};
-        filter: blur(${(1 - nextEnter) * 2}px);
+        filter: blur(${(1 - nextEnter) * 10}px);
         transform: translate3d(0, ${nextMoveUp}px, 0);
     `;
 
     function handleScroll() {
         const windowHeight = window.innerHeight;
-        
         if (section) {
             const rect = section.getBoundingClientRect();
-            // Calculate raw progress once per scroll event
             rawProgress = Math.max(0, Math.min(1, (windowHeight - rect.top) / (rect.height + windowHeight)));
         }
         if (nextSection) {
@@ -131,10 +125,12 @@
         background-color: #f9f7f2;
         font-family: serif;
         overflow-x: hidden;
+        /* Force smooth scrolling behavior at browser level for backup */
+        scroll-behavior: auto; 
     }
 
     .main-wrapper {
-        height: 250vh; /* Keeps the cards on screen longer */
+        height: 250vh; 
         position: relative;
     }
 
@@ -182,7 +178,8 @@
         align-items: center;
         position: relative;
         z-index: 20;
-        background-color: white; /* Ensures it acts as a solid "blind" rising up */
+        /* Match previous section background for seamless blend */
+        /* background-color: #f9f7f2;  */
         padding: 15vh 5vw;
     }
 
