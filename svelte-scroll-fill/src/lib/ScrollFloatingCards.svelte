@@ -10,13 +10,13 @@
     };
 
     let section: HTMLElement;
-    let nextSection: HTMLElement;
+    let lifestyleSection: HTMLElement;
     
     let rawProgress = 0;
-    let rawNextProgress = 0;
+    let rawLifestyleProgress = 0;
     
     let smoothProgress = 0;
-    let smoothNextProgress = 0;
+    let smoothLifestyleProgress = 0;
 
     const cards = [
         { id: 1, from: { x: -280, y: 0 }, to: { x: -1050, y: -180 }, startAt: 0.1, endAt: 0.8, img: 'https://www.datocms-assets.com/98401/1755809319-home-scroller-img-1-0.png' },
@@ -25,51 +25,57 @@
         { id: 4, from: { x: 380, y: 260 }, to: { x: 1150, y: 160 }, startAt: 0.1, endAt: 0.8, img: 'https://www.datocms-assets.com/98401/1755809335-home-scroller-img-1-3.png' }
     ];
 
-    // --- SMOOTHING ENGINE ---
     function tick() {
-        // Changed from 0.009 (too slow/stuck) to 0.07 (smooth but responsive)
-        const friction = 0.07;
+        const friction = 0.08;
         smoothProgress = lerp(smoothProgress, rawProgress, friction);
-        smoothNextProgress = lerp(smoothNextProgress, rawNextProgress, friction);
-        
+        smoothLifestyleProgress = lerp(smoothLifestyleProgress, rawLifestyleProgress, friction);
         requestAnimationFrame(tick);
     }
 
-    // --- REACTIVE STYLES ---
-    $: titleMoveDown = lerp(0, 450, smoothProgress); 
-    $: phraseBlurExit = rangeProgress(smoothProgress, 0.45, 0.80);
-    $: restWordBlurExit = rangeProgress(smoothProgress, 0.65, 0.90);
+    // --- IMPROVED CHOREOGRAPHY ---
+    // 1. Title Exit (Ends at 0.6)
+    $: phraseExit = rangeProgress(smoothProgress, 0.35, 0.55);
+    $: restExit = rangeProgress(smoothProgress, 0.40, 0.60);
 
-    $: phraseStyle = `
-        opacity: ${1 - phraseBlurExit}; 
-        filter: blur(${phraseBlurExit * 15}px);
-        transform: translate3d(0, ${titleMoveDown}px, 0);
+    // 2. Paragraph Entry (Starts at 0.6 immediately after title leaves)
+    $: paraEnter = rangeProgress(smoothProgress, 0.50, 0.70);
+
+    // 3. Layer Global Exit (Only starts when lifestyle section actually hits the viewport)
+    $: layerExit = 1 - rangeProgress(smoothLifestyleProgress, 0, 0.2);
+
+    $: phraseStyle = `opacity: ${1 - phraseExit}; filter: blur(${phraseExit * 15}px);`;
+    $: restStyle = `opacity: ${1 - restExit}; filter: blur(${restExit * 15}px);`;
+
+    $: paraStyle = `
+        opacity: ${paraEnter}; 
+        filter: blur(${(1 - paraEnter) * 20}px);
+        transform: translate3d(0, ${lerp(30, 0, paraEnter)}px, 0);
+        visibility: ${paraEnter <= 0 ? 'hidden' : 'visible'};
     `;
-    $: restStyle = `
-        opacity: ${restWordBlurExit > 0.9 ? 0 : 1 - restWordBlurExit}; 
-        filter: blur(${restWordBlurExit * 15}px);
-        transform: translate3d(0, ${titleMoveDown}px, 0);
+
+    $: fixedLayerStyle = `
+        opacity: ${layerExit};
+        visibility: ${layerExit <= 0 ? 'hidden' : 'visible'};
     `;
 
-    // Increased entrance window so it starts rising sooner (0.05 vs 0.1)
-    $: nextEnter = rangeProgress(smoothNextProgress, 0.05, 0.5); 
-    $: nextMoveUp = lerp(200, 0, nextEnter);
-
-    $: nextStyle = `
-        opacity: ${nextEnter};
-        filter: blur(${(1 - nextEnter) * 10}px);
-        transform: translate3d(0, ${nextMoveUp}px, 0);
+    // --- LIFESTYLE IMAGE STYLE ---
+    $: lifestyleEnter = rangeProgress(smoothLifestyleProgress, 0.1, 0.6);
+    $: lifestyleStyle = `
+        opacity: ${lifestyleEnter};
+        filter: blur(${(1 - lifestyleEnter) * 15}px);
+        transform: translate3d(0, ${lerp(100, 0, lifestyleEnter)}px, 0);
     `;
 
     function handleScroll() {
         const windowHeight = window.innerHeight;
         if (section) {
             const rect = section.getBoundingClientRect();
+            // Full range scroll progress
             rawProgress = Math.max(0, Math.min(1, (windowHeight - rect.top) / (rect.height + windowHeight)));
         }
-        if (nextSection) {
-            const rect = nextSection.getBoundingClientRect();
-            rawNextProgress = Math.max(0, Math.min(1, (windowHeight - rect.top) / (rect.height + windowHeight)));
+        if (lifestyleSection) {
+            const rect = lifestyleSection.getBoundingClientRect();
+            rawLifestyleProgress = Math.max(0, Math.min(1, (windowHeight - rect.top) / (rect.height + windowHeight)));
         }
     }
 
@@ -85,6 +91,21 @@
 </script>
 
 <div class="scroll-canvas">
+    <div class="fixed-content-layer" style={fixedLayerStyle}>
+        <h1 class="hatch-title" style="visibility: {phraseExit >= 1 && restExit >= 1 ? 'hidden' : 'visible'}">
+            <span style={phraseStyle}>Make space for&nbsp;</span>
+            <span style={restStyle}>rest</span>
+        </h1>
+
+        <div class="para-container" style={paraStyle}>
+            <p class="description-text">
+                We make restful tech that puts humans first - it doesn't track you, 
+                sell your data, or hijack your time. Our only goal is to help you 
+                rest more, and sleep easier.
+            </p>
+        </div>
+    </div>
+
     <section bind:this={section} class="main-wrapper">
         <div class="sticky-container">
             {#each cards as card}
@@ -95,26 +116,12 @@
                     <img src={card.img} alt="" />
                 </div>
             {/each}
-
-            <div class="heading-layer">
-                <h1 class="hatch-title">
-                    <span style={phraseStyle}>Make space for&nbsp;</span>
-                    <span style={restStyle}>rest</span>
-                </h1>
-            </div>
         </div>
     </section>
 
-    <section bind:this={nextSection} class="landing-wrapper">
-        <div class="content-box" style={nextStyle}>
-            <p class="description-text">
-                We make restful tech that puts humans first - it doesn't track you, 
-                sell your data, or hijack your time. Our only goal is to help you 
-                rest more, and sleep easier.
-            </p>
-            <div class="main-visual">
-                <img src="https://www.datocms-assets.com/98401/1739823152-large-lifestyle.png" alt="Lifestyle Rest" />
-            </div>
+    <section bind:this={lifestyleSection} class="lifestyle-wrapper">
+        <div class="lifestyle-container" style={lifestyleStyle}>
+            <img src="https://www.datocms-assets.com/98401/1739823152-large-lifestyle.png" alt="Lifestyle Rest" />
         </div>
     </section>
 </div>
@@ -125,12 +132,10 @@
         background-color: #f9f7f2;
         font-family: serif;
         overflow-x: hidden;
-        /* Force smooth scrolling behavior at browser level for backup */
-        scroll-behavior: auto; 
     }
 
     .main-wrapper {
-        height: 250vh; 
+        height: 400vh; /* Increased height to give the paragraph time to shine */
         position: relative;
     }
 
@@ -144,17 +149,40 @@
         overflow: hidden;
     }
 
-    .hatch-title {
-        font-size: clamp(32px, 7vw, 60px);
-        color: #1a1a1a;
+    .fixed-content-layer {
+        position: fixed;
+        inset: 0;
         display: flex;
-        white-space: nowrap;
-        z-index: 5;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+        pointer-events: none;
+        will-change: opacity;
     }
 
-    .hatch-title span { 
-        display: inline-block; 
-        will-change: filter, opacity, transform; 
+    .hatch-title {
+        position: absolute;
+        margin: 0;
+        font-size: clamp(32px, 7vw, 60px);
+        color: #1a1a1a;
+        text-align: center;
+        white-space: nowrap;
+    }
+
+    .para-container {
+        position: absolute;
+        max-width: 650px;
+        padding: 0 24px;
+        text-align: center;
+        will-change: transform, opacity, filter;
+    }
+
+    .description-text {
+        font-family: sans-serif;
+        font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+        line-height: 1.6;
+        color: #333;
+        margin: 0;
     }
 
     .card-element {
@@ -168,37 +196,28 @@
     .card-element img { 
         width: 100%;
         border-radius: 12px; 
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
     }
 
-    .landing-wrapper {
-        min-height: 100vh;
+    .lifestyle-wrapper {
+        min-height: 120vh;
         display: flex;
-        flex-direction: column;
         justify-content: center;
         align-items: center;
+        padding: 10vh 5vw;
+        background-color: #f9f7f2;
         position: relative;
         z-index: 20;
-        /* Match previous section background for seamless blend */
-        /* background-color: #f9f7f2;  */
-        padding: 15vh 5vw;
     }
 
-    .content-box {
-        max-width: 800px;
-        text-align: center;
-        will-change: transform, opacity, filter;
+    .lifestyle-container {
+        max-width: 1000px;
+        width: 100%;
     }
 
-    .description-text {
-        font-family: sans-serif;
-        font-size: clamp(1.1rem, 2.5vw, 1.6rem);
-        line-height: 1.5;
-        color: #333;
-        margin-bottom: 4rem;
-    } 
-
-    .main-visual img { 
-        width: 100%; 
-        border-radius: 24px; 
+    .lifestyle-container img {
+        width: 100%;
+        border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.1);
     }
 </style>
