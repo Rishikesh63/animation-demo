@@ -31,8 +31,8 @@
     // --- SMOOTHING ENGINE ---
     function tick() {
         // Lowering to 0.08 makes the "momentum" even smoother and more premium
-        smoothProgress = lerp(smoothProgress, rawProgress, 0.08);
-        smoothNextProgress = lerp(smoothNextProgress, rawNextProgress, 0.08);
+        smoothProgress = lerp(smoothProgress, rawProgress, 0.01);
+        smoothNextProgress = lerp(smoothNextProgress, rawNextProgress, 0.01);
         
         requestAnimationFrame(tick);
     }
