@@ -10,72 +10,50 @@
     };
 
     let section: HTMLElement;
-    let lifestyleSection: HTMLElement;
-    
     let rawProgress = 0;
-    let rawLifestyleProgress = 0;
-    
     let smoothProgress = 0;
-    let smoothLifestyleProgress = 0;
 
     const cards = [
-        { id: 1, from: { x: -280, y: 0 }, to: { x: -1050, y: -180 }, startAt: 0.1, endAt: 0.8, img: 'https://www.datocms-assets.com/98401/1755809319-home-scroller-img-1-0.png' },
-        { id: 2, from: { x: 450, y: -40 }, to: { x: 1050, y: -180 }, startAt: 0.1, endAt: 0.8, img: 'https://www.datocms-assets.com/98401/1755809335-home-scroller-img-1-1.png' },
-        { id: 3, from: { x: -390, y: 360 }, to: { x: -1150, y: 160 }, startAt: 0.1, endAt: 0.8, img: 'https://www.datocms-assets.com/98401/1755809335-home-scroller-img-1-2.gif' },
-        { id: 4, from: { x: 380, y: 260 }, to: { x: 1150, y: 160 }, startAt: 0.1, endAt: 0.8, img: 'https://www.datocms-assets.com/98401/1755809335-home-scroller-img-1-3.png' }
+        { id: 1, from: { x: -280, y: 0 }, to: { x: -1050, y: -180 }, startAt: 0.1, endAt: 0.7, img: 'https://www.datocms-assets.com/98401/1755809319-home-scroller-img-1-0.png' },
+        { id: 2, from: { x: 450, y: -40 }, to: { x: 1050, y: -180 }, startAt: 0.1, endAt: 0.7, img: 'https://www.datocms-assets.com/98401/1755809335-home-scroller-img-1-1.png' },
+        { id: 3, from: { x: -390, y: 360 }, to: { x: -1150, y: 160 }, startAt: 0.1, endAt: 0.7, img: 'https://www.datocms-assets.com/98401/1755809335-home-scroller-img-1-2.gif' },
+        { id: 4, from: { x: 380, y: 260 }, to: { x: 1150, y: 160 }, startAt: 0.1, endAt: 0.7, img: 'https://www.datocms-assets.com/98401/1755809335-home-scroller-img-1-3.png' }
     ];
 
     function tick() {
-        const friction = 0.08;
-        smoothProgress = lerp(smoothProgress, rawProgress, friction);
-        smoothLifestyleProgress = lerp(smoothLifestyleProgress, rawLifestyleProgress, friction);
+        smoothProgress = lerp(smoothProgress, rawProgress, 0.08);
         requestAnimationFrame(tick);
     }
 
-    // --- IMPROVED CHOREOGRAPHY ---
-    // 1. Title Exit (Ends at 0.6)
-    $: phraseExit = rangeProgress(smoothProgress, 0.35, 0.55);
-    $: restExit = rangeProgress(smoothProgress, 0.40, 0.60);
+    // --- CHOREOGRAPHY ---
+    $: phraseExit = rangeProgress(smoothProgress, 0.30, 0.50);
+    $: restExit = rangeProgress(smoothProgress, 0.35, 0.55);
 
-    // 2. Paragraph Entry (Starts at 0.6 immediately after title leaves)
-    $: paraEnter = rangeProgress(smoothProgress, 0.50, 0.70);
+    // Paragraph & Image Entry
+    $: contentEnter = rangeProgress(smoothProgress, 0.60, 0.82);
 
-    // 3. Layer Global Exit (Only starts when lifestyle section actually hits the viewport)
-    $: layerExit = 1 - rangeProgress(smoothLifestyleProgress, 0, 0.2);
+    // Scroll Away Logic
+    $: scrollAway = rangeProgress(smoothProgress, 0.88, 1.0);
+    $: moveUpOffset = lerp(0, -600, scrollAway);
 
+    // --- STYLES ---
     $: phraseStyle = `opacity: ${1 - phraseExit}; filter: blur(${phraseExit * 15}px);`;
     $: restStyle = `opacity: ${1 - restExit}; filter: blur(${restExit * 15}px);`;
 
-    $: paraStyle = `
-        opacity: ${paraEnter}; 
-        filter: blur(${(1 - paraEnter) * 20}px);
-        transform: translate3d(0, ${lerp(30, 0, paraEnter)}px, 0);
-        visibility: ${paraEnter <= 0 ? 'hidden' : 'visible'};
+    $: combinedContentStyle = `
+        opacity: ${contentEnter}; 
+        filter: blur(${(1 - contentEnter) * 15}px);
+        transform: translate3d(0, ${lerp(30, 0, contentEnter) + moveUpOffset}px, 0);
     `;
 
-    $: fixedLayerStyle = `
-        opacity: ${layerExit};
-        visibility: ${layerExit <= 0 ? 'hidden' : 'visible'};
-    `;
-
-    // --- LIFESTYLE IMAGE STYLE ---
-    $: lifestyleEnter = rangeProgress(smoothLifestyleProgress, 0.1, 0.6);
-    $: lifestyleStyle = `
-        opacity: ${lifestyleEnter};
-        filter: blur(${(1 - lifestyleEnter) * 15}px);
-        transform: translate3d(0, ${lerp(100, 0, lifestyleEnter)}px, 0);
-    `;
+    // Dynamic scale for the image to keep it from taking over the screen
+    $: imgScale = lerp(0.9, 1, contentEnter);
 
     function handleScroll() {
-        const windowHeight = window.innerHeight;
         if (section) {
             const rect = section.getBoundingClientRect();
-            // Full range scroll progress
+            const windowHeight = window.innerHeight;
             rawProgress = Math.max(0, Math.min(1, (windowHeight - rect.top) / (rect.height + windowHeight)));
-        }
-        if (lifestyleSection) {
-            const rect = lifestyleSection.getBoundingClientRect();
-            rawLifestyleProgress = Math.max(0, Math.min(1, (windowHeight - rect.top) / (rect.height + windowHeight)));
         }
     }
 
@@ -91,18 +69,25 @@
 </script>
 
 <div class="scroll-canvas">
-    <div class="fixed-content-layer" style={fixedLayerStyle}>
+    <div class="fixed-content-layer">
+        
         <h1 class="hatch-title" style="visibility: {phraseExit >= 1 && restExit >= 1 ? 'hidden' : 'visible'}">
             <span style={phraseStyle}>Make space for&nbsp;</span>
             <span style={restStyle}>rest</span>
         </h1>
 
-        <div class="para-container" style={paraStyle}>
-            <p class="description-text">
-                We make restful tech that puts humans first - it doesn't track you, 
-                sell your data, or hijack your time. Our only goal is to help you 
-                rest more, and sleep easier.
-            </p>
+        <div class="combined-stage" style={combinedContentStyle}>
+            <div class="para-container">
+                <p class="description-text">
+                    We make restful tech that puts humans first - it doesn't track you, 
+                    sell your data, or hijack your time. Our only goal is to help you 
+                    rest more, and sleep easier.
+                </p>
+            </div>
+            
+            <div class="lifestyle-fixed-container" style="transform: scale({imgScale});">
+                <img src="https://www.datocms-assets.com/98401/1739823152-large-lifestyle.png" alt="Lifestyle Rest" />
+            </div>
         </div>
     </div>
 
@@ -119,11 +104,7 @@
         </div>
     </section>
 
-    <section bind:this={lifestyleSection} class="lifestyle-wrapper">
-        <div class="lifestyle-container" style={lifestyleStyle}>
-            <img src="https://www.datocms-assets.com/98401/1739823152-large-lifestyle.png" alt="Lifestyle Rest" />
-        </div>
-    </section>
+    <div class="footer-spacer"></div>
 </div>
 
 <style>
@@ -135,8 +116,12 @@
     }
 
     .main-wrapper {
-        height: 400vh; /* Increased height to give the paragraph time to shine */
+        height: 500vh;
         position: relative;
+    }
+
+    .footer-spacer {
+        height: 100vh;
     }
 
     .sticky-container {
@@ -157,7 +142,6 @@
         justify-content: center;
         z-index: 10;
         pointer-events: none;
-        will-change: opacity;
     }
 
     .hatch-title {
@@ -169,55 +153,56 @@
         white-space: nowrap;
     }
 
-    .para-container {
+    .combined-stage {
         position: absolute;
-        max-width: 650px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        /* REDUCED GAP: Moves image closer to text */
+        gap: 1.5rem; 
+        width: 100%;
+        max-width: 800px;
         padding: 0 24px;
         text-align: center;
-        will-change: transform, opacity, filter;
+        /* Center content vertically in the fixed layer */
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    .para-container {
+        max-width: 580px;
     }
 
     .description-text {
         font-family: sans-serif;
-        font-size: clamp(1.2rem, 2.5vw, 1.5rem);
-        line-height: 1.6;
+        /* ADJUSTED FONT: Slightly smaller to save space */
+        font-size: clamp(1rem, 2vw, 1.25rem);
+        line-height: 1.5;
         color: #333;
         margin: 0;
+    }
+
+    .lifestyle-fixed-container {
+        width: 100%;
+        /* REDUCED IMAGE SIZE: 70% of viewport width max */
+        max-width: 70vh; 
+        transition: transform 0.1s ease-out;
+    }
+
+    .lifestyle-fixed-container img {
+        width: 100%;
+        border-radius: 16px;
+        box-shadow: 0 15px 45px rgba(0,0,0,0.1);
     }
 
     .card-element {
         position: absolute;
         width: 25vw;
         max-width: 380px;
-        z-index: 2;
-        will-change: transform;
     }
 
     .card-element img { 
         width: 100%;
         border-radius: 12px; 
-        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-    }
-
-    .lifestyle-wrapper {
-        min-height: 120vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 10vh 5vw;
-        background-color: #f9f7f2;
-        position: relative;
-        z-index: 20;
-    }
-
-    .lifestyle-container {
-        max-width: 1000px;
-        width: 100%;
-    }
-
-    .lifestyle-container img {
-        width: 100%;
-        border-radius: 24px;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.1);
     }
 </style>
