@@ -5,5 +5,5 @@
 </script>
 
 <!-- <FloatingGrid /> -->
-<ScrollFloatingCards />
-<!-- <WhyHome /> -->
+<!-- <ScrollFloatingCards /> -->
+<WhyHome />

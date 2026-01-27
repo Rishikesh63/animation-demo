@@ -31,4 +31,5 @@
 <div class="route-nav">
   <button on:click={() => push('/')}>Home</button>
   <button on:click={() => push('/scroll')}>Scroll</button>
+  <button on:click={() => push('/why-home')}>Why Home</button>
 </div>

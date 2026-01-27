@@ -5,10 +5,12 @@
 
   import Home from './pages/Home.svelte';
   import ScrollPage from './pages/ScrollPage.svelte';
+  import WhyHome from './pages/whyHome.svelte';
 
   const routes = {
     '/': Home,
-    '/scroll': ScrollPage
+    '/scroll': ScrollPage,
+    '/why-home': WhyHome
   };
 </script>
 

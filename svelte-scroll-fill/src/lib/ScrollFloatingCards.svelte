@@ -116,7 +116,7 @@
     }
 
     .main-wrapper {
-        height: 500vh;
+        height: 300vh;
         position: relative;
     }
 
@@ -185,7 +185,7 @@
     .lifestyle-fixed-container {
         width: 100%;
         /* REDUCED IMAGE SIZE: 70% of viewport width max */
-        max-width: 70vh; 
+        max-width: 80vh; 
         transition: transform 0.1s ease-out;
     }
 
