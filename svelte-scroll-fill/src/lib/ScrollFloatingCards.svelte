@@ -23,39 +23,40 @@
     let progress = 0;
     let nextProgress = 0;
    
-   // --- Unified Horizontal Card Configurations ---
     const cards = [
-        // Left Card 1
-        { id: 1, from: { x: -280, y: -180 }, to: { x: -1050, y: -180 }, startAt: 0.1, endAt: 0.8, img: 'https://www.datocms-assets.com/98401/1755809319-home-scroller-img-1-0.png' },
-        // Right Card 2
-        { id: 2, from: { x: 450, y: -180 }, to: { x: 1050, y: -180 }, startAt: 0.1, endAt: 0.8, img: 'https://www.datocms-assets.com/98401/1755809335-home-scroller-img-1-1.png' },
-        // Left Card 3
-        { id: 3, from: { x: -390, y: 160 }, to: { x: -1150, y: 160 }, startAt: 0.1, endAt: 0.8, img: 'https://www.datocms-assets.com/98401/1755809335-home-scroller-img-1-2.gif' },
-        // Right Card 4
-        { id: 4, from: { x: 380, y: 160 }, to: { x: 1150, y: 160 }, startAt: 0.1, endAt: 0.8, img: 'https://www.datocms-assets.com/98401/1755809335-home-scroller-img-1-3.png' }
+        { id: 1, from: { x: -280, y: 0 }, to: { x: -1050, y: -180 }, startAt: 0.1, endAt: 0.8, img: 'https://www.datocms-assets.com/98401/1755809319-home-scroller-img-1-0.png' },
+        { id: 2, from: { x: 450, y: -40 }, to: { x: 1050, y: -180 }, startAt: 0.1, endAt: 0.8, img: 'https://www.datocms-assets.com/98401/1755809335-home-scroller-img-1-1.png' },
+        { id: 3, from: { x: -390, y: 360 }, to: { x: -1150, y: 160 }, startAt: 0.1, endAt: 0.8, img: 'https://www.datocms-assets.com/98401/1755809335-home-scroller-img-1-2.gif' },
+        { id: 4, from: { x: 380, y: 260 }, to: { x: 1150, y: 160 }, startAt: 0.1, endAt: 0.8, img: 'https://www.datocms-assets.com/98401/1755809335-home-scroller-img-1-3.png' }
     ];
 
-    // --- BLURING EFFECT LOGIC (As per screenshot) ---
-    // Phrase blurs early
-    $: phraseBlurExit = rangeProgress(progress, 0.30, 0.40);
-    // "rest" blurs much later
-    $: restWordBlurExit = rangeProgress(progress, 0.40, 0.5);
+    // --- TEXT SCROLL & BLUR LOGIC ---
+    // This creates the downward movement (0px to 200px) as you scroll
+    $: titleMoveDown = lerp(0, 500, progress); 
+
+    // this create upward movement of next section content
+    $: nextMoveUp = lerp(200, 0, nextProgress);
+
+    $: phraseBlurExit = rangeProgress(progress, 0.45, 0.60);
+    $: restWordBlurExit = rangeProgress(progress, 0.55, 0.70);
 
     $: phraseStyle = `
         opacity: ${1 - phraseBlurExit}; 
         filter: blur(${lerp(0, 15, phraseBlurExit)}px);
+        transform: translateY(${titleMoveDown}px);
     `;
     $: restStyle = `
         opacity: ${1 - restWordBlurExit}; 
         filter: blur(${lerp(0, 15, restWordBlurExit)}px);
+        transform: translateY(${titleMoveDown}px);
     `;
 
-    // Next component seamless rising
-    $: nextEnter = rangeProgress(nextProgress, 0.1, 0.5); 
+    // Next component rising
+    $: nextEnter = rangeProgress(nextProgress, 0.0, 0.3); 
     $: nextStyle = `
         opacity: ${nextEnter};
         filter: blur(${lerp(15, 0, nextEnter)}px);
-        transform: translateY(${lerp(100, 0, nextEnter)}px);
+        transform: translateY(${nextMoveUp}px);
     `;
 
     function handleScroll() {
@@ -74,13 +75,6 @@
     
     <section bind:this={section} class="main-wrapper">
         <div class="sticky-container">
-            <div class="heading-layer">
-                <h1 class="hatch-title">
-                    <span style={phraseStyle}>Make space for&nbsp;</span>
-                    <span style={restStyle}>rest</span>
-                </h1>
-            </div>
-
             {#each cards as card}
                 {@const t = rangeProgress(progress, card.startAt, card.endAt)}
                 {@const x = lerp(card.from.x, card.to.x, t)}
@@ -89,6 +83,13 @@
                     <img src={card.img} alt="" />
                 </div>
             {/each}
+
+            <div class="heading-layer">
+                <h1 class="hatch-title">
+                    <span style={phraseStyle}>Make space for&nbsp;</span>
+                    <span style={restStyle}>rest</span>
+                </h1>
+            </div>
         </div>
     </section>
 
@@ -110,20 +111,13 @@
 <style>
     :global(html, body) {
         margin: 0;
-        /* padding: 0; */
-        /* background-color: #f9f7f2; */
+        background-color: #f9f7f2;
         font-family: serif;
-        overflow-x: auto;
     }
 
-    /* .scroll-canvas {
-        background-color: #f9f7f2;
-    } */
-
     .main-wrapper {
-        height: 300vh;
+        height: 140vh; /* Increased height for longer scroll effect */
         position: relative;
-        margin-bottom: -100vh; /* Eliminates the border gap */
     }
 
     .sticky-container {
@@ -137,7 +131,7 @@
     }
 
     .hatch-title {
-        font-size: clamp(32px, 7vw, 50px);
+        font-size: clamp(32px, 7vw, 60px);
         color: #1a1a1a;
         display: flex;
         white-space: nowrap;
@@ -146,29 +140,30 @@
 
     .hatch-title span { 
         display: inline-block; 
-        will-change: filter, opacity; 
+        will-change: filter, opacity, transform; 
     }
 
     .card-element {
         position: absolute;
         width: 25vw;
         max-width: 380px;
-        z-index: 10;
+        z-index: 2;
         will-change: transform;
-        
     }
 
-    .card-element img { width: 100%;
-         border-radius: 12px; 
-        }
+    .card-element img { 
+        width: 100%;
+        border-radius: 12px; 
+    }
 
     .landing-wrapper {
         min-height: 100vh;
         display: flex;
         justify-content: center;
-        /* padding: 20vh 5vw; */
         position: relative;
         z-index: 20;
+        /* background-color: #f9f7f2; Ensures it covers the sticky content */
+        padding-top: 10vh;
     }
 
     .content-box {
@@ -184,7 +179,8 @@
         margin-bottom: 4rem;
     }
 
-    .main-visual img { width: 100%; 
-    border-radius: 24px; 
+    .main-visual img { 
+        width: 100%; 
+        border-radius: 24px; 
     }
 </style>
