@@ -35,10 +35,10 @@
     $: titleMoveDown = lerp(0, 500, progress); 
 
     // this create upward movement of next section content
-    $: nextMoveUp = lerp(200, 0, nextProgress);
+    $: nextMoveUp = lerp(300, 0, nextProgress);
 
-    $: phraseBlurExit = rangeProgress(progress, 0.45, 0.60);
-    $: restWordBlurExit = rangeProgress(progress, 0.55, 0.70);
+    $: phraseBlurExit = rangeProgress(progress, 0.45, 0.80);
+    $: restWordBlurExit = rangeProgress(progress, 0.75, 0.98);
 
     $: phraseStyle = `
         opacity: ${1 - phraseBlurExit}; 
