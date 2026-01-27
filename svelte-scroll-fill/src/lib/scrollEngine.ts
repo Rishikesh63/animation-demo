@@ -35,18 +35,33 @@ export function rangeProgress(
 	return clamp((value - start) / (end - start));
 }
 
+// 🌗 Appear → Clear → Disappear
+export function blurValley(t: number) {
+	t = clamp(t);
+	return Math.abs(1 - 2 * t);
+}
+
+export function distanceFade(
+	pos: number,
+	center: number,
+	maxDistance: number
+) {
+	return clamp(Math.abs(pos - center) / maxDistance);
+}
+
 // ===============================
-// SCROLL PROGRESS (GENERIC)
+// SCROLL PROGRESS (IMPROVED)
 // ===============================
 export function computeScrollProgress(
 	el: HTMLElement,
-	offset = 0
+	offset = 0,
+	edgeFactor = 0.9 // 🔥 NEW (default)
 ) {
 	const rect = el.getBoundingClientRect();
 	const viewport = window.innerHeight;
 
 	return clamp(
 		(viewport - rect.top - offset) /
-			(rect.height + viewport)
+		(rect.height + viewport * edgeFactor)
 	);
 }

@@ -20,7 +20,7 @@
     cursor: pointer;
     background: rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(10px);
-    color: white;
+    color: rgb(237, 13, 155);
   }
 
   button:hover {
