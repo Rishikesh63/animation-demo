@@ -4,6 +4,7 @@
   import WhyHome from '../lib/WhyHome.svelte';
   import MissionSection from '../lib/MissionSection.svelte';
   import FeatureHighlights from '../lib/FeatureHighlights.svelte';
+  import AboutSection from '../lib/AboutSection.svelte';
 </script>
 
 <!-- <FloatingGrid /> -->
@@ -11,3 +12,4 @@
 <WhyHome />
 <MissionSection />
 <FeatureHighlights />
+<AboutSection />

@@ -2,8 +2,10 @@
   import ScrollFloatingCards from '../lib/ScrollFloatingCards.svelte';
   import FloatingGrid from '../lib/FloatingGrid.svelte';
   import WhyHome from '../lib/WhyHome.svelte';
+  import AboutSection from '../lib/AboutSection.svelte';
 </script>
 
 <!-- <FloatingGrid /> -->
 <ScrollFloatingCards />
 <!-- <WhyHome /> -->
+<AboutSection />
