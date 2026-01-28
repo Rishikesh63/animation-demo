@@ -10,7 +10,7 @@
   $: relativeScroll = scrollY - sectionTop;
   
   // Progress calculation: 
-  // We now divide by sectionHeight (which we will set to 320vh)
+  // We now divide by sectionHeight (which we will set to 300vh)
   $: progress = sectionHeight > 0 ? Math.max(0, Math.min(1, relativeScroll / sectionHeight)) : 0;
 
   // ANIMATION LOGIC
@@ -94,13 +94,13 @@
     --grey-text: #767373;
   }
 
-  /* KEY CHANGE: Height increased to 320vh.
+  /* KEY CHANGE: Height increased to 300vh.
      This gives you 2 full screen-lengths of scrolling BEFORE the cards section hits.
   */
   .section_why-home {
     position: relative;
     background-color: var(--white);
-    height: 320vh; 
+    height: 300vh; 
   }
 
   .sticky_container {

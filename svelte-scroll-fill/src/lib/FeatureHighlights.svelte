@@ -13,15 +13,14 @@
     "Lower Carbon Footprint."
   ];
 
-  // Function to check if a specific line is in the active "highlight zone"
   function getOpacity(itemTop: number, y: number) {
     if (!container) return 0.2;
+    // We target the center of the viewport
     const viewportCenter = y + window.innerHeight / 2;
     const distance = Math.abs(viewportCenter - itemTop);
     
-    // If the line is within 100px of the center, make it fully black
-    // otherwise, keep it at the 20% opacity (gray) from your snippet
-    return distance < 100 ? 1 : 0.2;
+    // Increased threshold slightly for a smoother transition
+    return distance < 150 ? 1 : 0.2;
   }
 
   onMount(() => {
@@ -35,6 +34,9 @@
 
     updatePositions();
     window.addEventListener('resize', updatePositions);
+    // Recalculate positions after a short delay to ensure layout is settled
+    setTimeout(updatePositions, 100); 
+
     return () => window.removeEventListener('resize', updatePositions);
   });
 </script>
@@ -44,7 +46,7 @@
 <section class="section-why">
   <div class="padding-section pb-0 padding-30">
     <div class="container-1204">
-      <div class="why_wrapper" bind:this={container}>
+      <div class="why_wrapper" bind:this={container} style="padding-bottom: 50vh;">
         {#each featureLines as line, i}
           <h2 
             class="heading_style-h2-gry" 
@@ -61,7 +63,8 @@
 <style>
   .section-why {
     background-color: #ffffff;
-    padding: 100px 0;
+    /* Extra top padding to ensure the first line highlights correctly */
+    padding-top: 30vh; 
   }
 
   .padding-30 {
@@ -77,7 +80,7 @@
   .why_wrapper {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 4rem; /* Increased gap to make the scroll effect more distinct */
   }
 
   .heading_style-h2-gry {
@@ -85,12 +88,7 @@
     font-weight: 800;
     line-height: 1.1;
     margin: 0;
-    transition: color 0.3s ease-out;
-    /* Ensuring proper font matching for Flint Labs style */
+    transition: color 0.4s ease-out; /* Smoother color transition */
     font-family: 'Sf Pro Rounded', Arial, sans-serif;
-  }
-
-  .pb-0 {
-    padding-bottom: 0;
   }
 </style>
