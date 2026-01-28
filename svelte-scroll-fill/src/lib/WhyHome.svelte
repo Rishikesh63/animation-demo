@@ -8,22 +8,22 @@
 
   // Track scroll progress within the section
   $: relativeScroll = scrollY - sectionTop;
+  
+  // Progress calculation: 
+  // We now divide by sectionHeight (which we will set to 320vh)
   $: progress = sectionHeight > 0 ? Math.max(0, Math.min(1, relativeScroll / sectionHeight)) : 0;
 
   // ANIMATION LOGIC
-  // 1. Start centered (0) and move DOWN (positive value)
-  $: translateY = progress * 70; 
-  // 2. Zoom in as it travels
-  $: scale = 1 - (progress * 0.4);
-  // 3. Switch from white to black as it hits the white background
-  $: headingColor = progress > 0.48 ? 'var(--black)' : 'var(--white)';
+  $: translateY = progress * 100; // Increased to 100vh for longer travel
+  $: scale = 1 + (progress * 0.4); // Zoom in
+  $: headingColor = progress > 0.5 ? 'var(--black)' : 'var(--white)';
 
   const updateDimensions = () => {
     if (sectionElement) {
       const rect = sectionElement.getBoundingClientRect();
       sectionTop = rect.top + window.scrollY;
-      // We set the scroll distance for the animation to one full viewport height
-      sectionHeight = window.innerHeight; 
+      // Capture the actual height of the section to use in the progress math
+      sectionHeight = sectionElement.offsetHeight - window.innerHeight; 
     }
   };
 
@@ -46,17 +46,19 @@
 
 <section class="section_why-home" bind:this={sectionElement}>
   
-  <div class="heading_sticky_container">
-    <div 
-      class="moving_heading_box" 
-      style="transform: translate3d(0, {translateY}vh, 0) scale3d({scale}, {scale}, 1); color: {headingColor};"
-    >
-      <h2 class="scroll-heading">But Why?</h2>
+  <div class="sticky_container">
+    <div class="heading_sticky_container">
+      <div 
+        class="moving_heading_box" 
+        style="transform: translate3d(0, {translateY}vh, 0) scale3d({scale}, {scale}, 1); color: {headingColor};"
+      >
+        <h2 class="scroll-heading">But Why?</h2>
+      </div>
     </div>
-  </div>
 
-  <div class="image_sticky_track">
-    <div class="img_background"></div>
+    <div class="image_sticky_track">
+      <div class="img_background"></div>
+    </div>
   </div>
 
   <div class="white_content_section">
@@ -92,16 +94,28 @@
     --grey-text: #767373;
   }
 
+  /* KEY CHANGE: Height increased to 320vh.
+     This gives you 2 full screen-lengths of scrolling BEFORE the cards section hits.
+  */
   .section_why-home {
     position: relative;
     background-color: var(--white);
+    height: 320vh; 
   }
 
-  /* Sticky Background Image */
-  .image_sticky_track {
+  .sticky_container {
     position: sticky;
     top: 0;
     height: 100vh;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .image_sticky_track {
+    position: absolute;
+    top: 0;
+    height: 100vh;
+    width: 100%;
     z-index: 1;
   }
 
@@ -114,13 +128,12 @@
     inset: 0;
   }
 
-  /* Overlay for the heading to ensure it travels across sections */
   .heading_sticky_container {
-    position: sticky;
+    position: absolute;
     top: 0;
-    height: 0; /* Zero height prevents it from blocking the scroll flow */
+    height: 100vh;
     width: 100%;
-    z-index: 100; /* Stays on top of the white content section */
+    z-index: 100;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -130,9 +143,6 @@
   .moving_heading_box {
     will-change: transform;
     transition: color 0.3s ease;
-    /* Centers the heading in the initial viewport height */
-    margin-top: 100vh; 
-    transform-origin: center;
   }
 
   .scroll-heading {
@@ -143,13 +153,13 @@
     line-height: 1;
   }
 
-  /* Main content section */
   .white_content_section {
     position: relative;
-    z-index: 50; /* Sits between the image (1) and the moving heading (100) */
+    z-index: 150; 
     background: var(--white);
     padding: 160px 24px;
     border-radius: 40px 40px 0 0;
+    /* This section starts appearing after the 300vh scroll */
   }
 
   .container-1043 {
@@ -158,66 +168,15 @@
     text-align: center;
   }
 
-  .intro_text_block {
-    margin-bottom: 80px;
-    padding-top: 100px; /* Provides space for 'But Why?' to land */
-  }
-
-  .description-large {
-    font-size: clamp(1.4rem, 4vw, 2.3rem);
-    color: var(--black);
-    font-weight: 500;
-    margin: 0;
-  }
-
-  .reasons_grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 80px 60px;
-    text-align: left;
-    margin-top: 60px;
-  }
-
-  .reason_card {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  .reason_icon {
-    width: 52px;
-    height: 52px;
-  }
-
-  .reason_h3 {
-    font-size: 1.9rem;
-    font-weight: 700;
-    color: var(--black);
-    line-height: 1.2;
-    margin: 0;
-  }
-
-  .reason_p {
-    color: var(--grey-text);
-    font-size: 1.15rem;
-    line-height: 1.5;
-    margin: 0;
-  }
-
-  .final_question_box {
-    margin-top: 120px;
-    padding-bottom: 40px;
-  }
-
-  .red_underline_text {
-    display: inline-block;
-    font-size: clamp(1.4rem, 5vw, 2.5rem);
-    color: var(--red);
-    font-weight: 700;
-    text-decoration: underline;
-    text-underline-offset: 12px;
-    line-height: 1.3;
-  }
+  .intro_text_block { margin-bottom: 80px; padding-top: 100px; }
+  .description-large { font-size: clamp(1.4rem, 4vw, 2.3rem); color: var(--black); font-weight: 500; margin: 0; }
+  .reasons_grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 80px 60px; text-align: left; margin-top: 60px; }
+  .reason_card { display: flex; flex-direction: column; gap: 20px; }
+  .reason_icon { width: 52px; height: 52px; }
+  .reason_h3 { font-size: 1.9rem; font-weight: 700; color: var(--black); line-height: 1.2; margin: 0; }
+  .reason_p { color: var(--grey-text); font-size: 1.15rem; line-height: 1.5; margin: 0; }
+  .final_question_box { margin-top: 120px; padding-bottom: 40px; }
+  .red_underline_text { display: inline-block; font-size: clamp(1.4rem, 5vw, 2.5rem); color: var(--red); font-weight: 700; text-decoration: underline; text-underline-offset: 12px; line-height: 1.3; }
 
   @media (max-width: 768px) {
     .reasons_grid { grid-template-columns: 1fr; gap: 40px; }
