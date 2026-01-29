@@ -1,156 +1,173 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount } from 'svelte';
 
-  export let text =
-    "Blending design and code with functional clarity and creative precision. Delivering thoughtful digital systems with structure, flow, and expressive interaction.";
+  let scrollY = 0;
+  let sectionEl: HTMLElement;
+  let sectionTop = 0;
 
-  export let fontSize = 72;
-  export let lineHeight = 1.05;
-  export let letterSpacing = -2;
-  export let transitionStartIndex = 22;
+  $: progress = scrollY - sectionTop;
 
-  let el: HTMLElement;
-  let progress = 0;
-
-  function clamp(v: number) {
-    return Math.min(1, Math.max(0, v));
-  }
-
-  function onScroll() {
-    if (!el) return;
-
-    const rect = el.getBoundingClientRect();
-    const vh = window.innerHeight;
-
-    // same feel as Framer offset ["start 0.75", "start 0.15"]
-    const start = vh * 0.75;
-    const end = vh * 0.15;
-
-    progress = clamp((start - rect.top) / (start - end));
+  function updateTop() {
+    if (sectionEl) sectionTop = sectionEl.offsetTop;
   }
 
   onMount(() => {
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    updateTop();
+    const ro = new ResizeObserver(updateTop);
+    ro.observe(sectionEl);
+    return () => ro.disconnect();
   });
-
-  const chars = Array.from(text);
 </script>
 
-<section class="service">
-  <!-- MEDIA (FREE, NOT MASKED) -->
-  <div class="media">
-    <img
-      class="img top"
-      src="https://framerusercontent.com/images/5emb8oOwafbQsfWVIaaZ12WcTM.png"
-    />
-    <img
-      class="img bottom"
-      src="https://framerusercontent.com/images/tFXdT1GAWfzky0TCheIFtJR4O3I.png"
-    />
-    <video
-      src="https://framerusercontent.com/assets/fEkvm0HYUUFHc0WiH6ssCVGITR0.mp4"
-      autoplay
-      muted
-      loop
-      playsinline
-    />
+<svelte:window bind:scrollY />
+
+<section class="about" bind:this={sectionEl}>
+  <div class="container">
+    
+    <div class="text-layer base-text">
+      <h1 class="headline">
+        <span><span>B</span><span>l</span><span>e</span><span>n</span><span>d</span><span>i</span><span>n</span><span>g</span>&nbsp;</span>
+        <span><span>d</span><span>e</span><span>s</span><span>i</span><span>g</span><span>n</span>&nbsp;</span>
+        <span><span>a</span><span>n</span><span>d</span>&nbsp;</span>
+        <span><span>c</span><span>o</span><span>d</span><span>e</span>&nbsp;</span>
+        <span><span>w</span><span>i</span><span>t</span><span>h</span>&nbsp;</span>
+        <span><span>f</span><span>u</span><span>n</span><span>c</span><span>t</span><span>i</span><span>o</span><span>n</span><span>a</span><span>l</span>&nbsp;</span>
+        <span><span>c</span><span>l</span><span>a</span><span>r</span><span>i</span><span>t</span><span>y</span>&nbsp;</span>
+        <span><span>a</span><span>n</span><span>d</span>&nbsp;</span>
+        <span><span>c</span><span>r</span><span>e</span><span>a</span><span>t</span><span>i</span><span>v</span><span>e</span>&nbsp;</span>
+        <span><span>p</span><span>r</span><span>e</span><span>c</span><span>i</span><span>s</span><span>i</span><span>o</span><span>n</span><span>.</span>&nbsp;</span>
+      </h1>
+    </div>
+
+    <div class="text-layer media-mask">
+      
+      <div class="media-container">
+        <div class="float image-top" style="transform: translate3d(0,{progress * -0.15}px,0)">
+          <img src="https://framerusercontent.com/images/5emb8oOwafbQsfWVIaaZ12WcTM.png" alt="" />
+        </div>
+        <div class="float image-bottom" style="transform: translate3d(0,{progress * -0.25}px,0)">
+          <img src="https://framerusercontent.com/images/tFXdT1GAWfzky0TCheIFtJR4O3I.png" alt="" />
+        </div>
+        <div class="video-wrap">
+          <video 
+            src="https://framerusercontent.com/assets/fEkvm0HYUUFHc0WiH6ssCVGITR0.mp4" 
+            autoplay muted loop playsinline 
+          />
+        </div>
+      </div>
+
+      <h1 class="headline mask-text" aria-hidden="true">
+        <span><span>B</span><span>l</span><span>e</span><span>n</span><span>d</span><span>i</span><span>n</span><span>g</span>&nbsp;</span>
+        <span><span>d</span><span>e</span><span>s</span><span>i</span><span>g</span><span>n</span>&nbsp;</span>
+        <span><span>a</span><span>n</span><span>d</span>&nbsp;</span>
+        <span><span>c</span><span>o</span><span>d</span><span>e</span>&nbsp;</span>
+        <span><span>w</span><span>i</span><span>t</span><span>h</span>&nbsp;</span>
+        <span><span>f</span><span>u</span><span>n</span><span>c</span><span>t</span><span>i</span><span>o</span><span>n</span><span>a</span><span>l</span>&nbsp;</span>
+        <span><span>c</span><span>l</span><span>a</span><span>r</span><span>i</span><span>t</span><span>y</span>&nbsp;</span>
+        <span><span>a</span><span>n</span><span>d</span>&nbsp;</span>
+        <span><span>c</span><span>r</span><span>e</span><span>a</span><span>t</span><span>i</span><span>v</span><span>e</span>&nbsp;</span>
+        <span><span>p</span><span>r</span><span>e</span><span>c</span><span>i</span><span>s</span><span>i</span><span>o</span><span>n</span><span>.</span>&nbsp;</span>
+      </h1>
+    </div>
+
   </div>
-
-  <!-- TEXT -->
-  <p
-    class="text"
-    bind:this={el}
-    style="
-      font-size: {fontSize}px;
-      line-height: {lineHeight};
-      letter-spacing: {letterSpacing}px;
-    "
-  >
-    {#each chars as char, i}
-      {@const start = i / chars.length}
-      {@const end = (i + 1) / chars.length}
-
-      {@const t =
-        i < transitionStartIndex
-          ? 1
-          : clamp((progress - start) / (end - start))}
-
-      <span
-        style="
-          color: rgb(
-            {102 + (255 - 102) * t},
-            {102 + (255 - 102) * t},
-            {102 + (255 - 102) * t}
-          );
-        "
-      >
-        {char === " " ? "\u00A0" : char}
-      </span>
-    {/each}
-  </p>
 </section>
 
 <style>
-  .service {
-    position: relative;
-    background: black;
-    padding: 160px 0;
-    overflow: hidden;
-    font-family: "Inter Display", sans-serif;
+  :root {
+    --black: #050505;
+    /* CHANGE THIS FOR THE MAIN TEXT COLOR */
+    --text-base: #333344; 
+    /* CHANGE THIS TO TINT THE MEDIA MASK (Optional) */
+    --mask-tint: rgba(255, 255, 255, 1); 
   }
 
-  /* ================= MEDIA ================= */
+  .about {
+    background: var(--black);
+    padding: 160px 0;
+    position: relative;
+    overflow: hidden;
+    font-family: "inter display", sans-serif;
+  }
 
-  .media {
+  .container {
+    max-width: 1300px;
+    margin: 0 auto;
+    position: relative;
+    height: 700px;
+  }
+
+  .text-layer {
     position: absolute;
     inset: 0;
-    z-index: 0;
+    pointer-events: none;
   }
 
-  .media video {
-    position: absolute;
-    right: 5%;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 420px;
-    height: 640px;
-    object-fit: cover;
-    border-radius: 32px;
-  }
-
-  .media .img {
-    position: absolute;
-    width: 28%;
-    border-radius: 24px;
-  }
-
-  .media .img.top {
-    top: 6%;
-    left: 8%;
-  }
-
-  .media .img.bottom {
-    bottom: 4%;
-    left: 18%;
-  }
-
-  /* ================= TEXT ================= */
-
-  .text {
-    position: relative;
-    z-index: 1;
-    max-width: 1100px;
-    padding-left: 5%;
+  .headline {
     margin: 0;
+    padding-left: 5%;
+    font-size: 79px;
     font-weight: 500;
-    color: rgb(102, 102, 102);
+    line-height: 1.1;
+    letter-spacing: -2.1px;
     display: flex;
     flex-wrap: wrap;
   }
 
-  .text span {
-    white-space: pre;
+  /* BASE LAYER: Updated to use the variable */
+  .base-text {
+    z-index: 1;
+    color: var(--text-base);
+  }
+
+  .media-mask {
+    z-index: 2;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    display: flex;
+    flex-direction: column;
+    /* Keeps the "lighting up" effect */
+    mix-blend-mode: screen; 
+  }
+
+  .media-container {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  .float {
+    position: absolute;
+    width: 28%;
+    border-radius: 24px;
+    overflow: hidden;
+  }
+
+  .float img { width: 100%; display: block; }
+
+  .image-top { top: 15%; left: 10%; }
+  .image-bottom { bottom: 25%; left: 20%; }
+
+  .video-wrap {
+    position: absolute;
+    right: 5%;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .video-wrap video {
+    width: 400px;
+    height: 600px;
+    object-fit: cover;
+    border-radius: 32px;
+  }
+
+  .media-mask .headline span > span {
+    background: inherit;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
 </style>
